@@ -26,27 +26,27 @@ jobs:
           pip install -r requirements.txt
 
       - name: Syntax check
-        run: python -m py_compile app.py
+        run: python -m py_compile app_v2.py
 
       - name: Self test
-        run: python app.py --self-test
+        run: python app_v2.py --self-test
 
       - name: Build EXE
         shell: pwsh
         run: |
-          pyinstaller --noconfirm --clean --onefile --windowed --name SYCM_Collector_API --collect-all playwright --collect-all openpyxl app.py
+          pyinstaller --noconfirm --clean --onefile --windowed --name SYCM_Collector_API_V2 --collect-all playwright --collect-all openpyxl app_v2.py
 
       - name: Verify artifact
         shell: pwsh
         run: |
-          if (!(Test-Path 'dist/SYCM_Collector_API.exe')) { throw 'EXE not created' }
-          $size = (Get-Item 'dist/SYCM_Collector_API.exe').Length
+          if (!(Test-Path 'dist/SYCM_Collector_API_V2.exe')) { throw 'EXE not created' }
+          $size = (Get-Item 'dist/SYCM_Collector_API_V2.exe').Length
           Write-Host "EXE size: $size bytes"
           if ($size -lt 1000000) { throw 'EXE unexpectedly small' }
 
       - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
-          name: SYCM_Collector_API_Windows
-          path: dist/SYCM_Collector_API.exe
+          name: SYCM_Collector_API_V2_Windows
+          path: dist/SYCM_Collector_API_V2.exe
           if-no-files-found: error
