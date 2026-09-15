@@ -28,22 +28,25 @@ jobs:
       - name: Syntax check
         run: python -m py_compile app.py
 
+      - name: Self test
+        run: python app.py --self-test
+
       - name: Build EXE
         shell: pwsh
         run: |
-          pyinstaller --noconfirm --clean --onefile --windowed --name SYCM_Collector --collect-all playwright --collect-all openpyxl app.py
+          pyinstaller --noconfirm --clean --onefile --windowed --name SYCM_Collector_API --collect-all playwright --collect-all openpyxl app.py
 
       - name: Verify artifact
         shell: pwsh
         run: |
-          if (!(Test-Path 'dist/SYCM_Collector.exe')) { throw 'EXE not created' }
-          $size = (Get-Item 'dist/SYCM_Collector.exe').Length
+          if (!(Test-Path 'dist/SYCM_Collector_API.exe')) { throw 'EXE not created' }
+          $size = (Get-Item 'dist/SYCM_Collector_API.exe').Length
           Write-Host "EXE size: $size bytes"
           if ($size -lt 1000000) { throw 'EXE unexpectedly small' }
 
       - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
-          name: SYCM_Collector_Windows
-          path: dist/SYCM_Collector.exe
+          name: SYCM_Collector_API_Windows
+          path: dist/SYCM_Collector_API.exe
           if-no-files-found: error
