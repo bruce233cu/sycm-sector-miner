@@ -1,0 +1,47 @@
+name: Build Windows EXE
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Syntax check
+        run: python -m py_compile app.py
+
+      - name: Build EXE
+        shell: pwsh
+        run: |
+          pyinstaller --noconfirm --clean --onefile --windowed --name SYCM_Collector --collect-all playwright --collect-all openpyxl app.py
+
+      - name: Verify artifact
+        shell: pwsh
+        run: |
+          if (!(Test-Path 'dist/SYCM_Collector.exe')) { throw 'EXE not created' }
+          $size = (Get-Item 'dist/SYCM_Collector.exe').Length
+          Write-Host "EXE size: $size bytes"
+          if ($size -lt 1000000) { throw 'EXE unexpectedly small' }
+
+      - name: Upload EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: SYCM_Collector_Windows
+          path: dist/SYCM_Collector.exe
+          if-no-files-found: error
